@@ -1,5 +1,6 @@
-USE_CAMERA_STUB := true
+DEVICE_TREE := device/samsung/jactivelte
 
+# Bootloader
 TARGET_NO_BOOTLOADER := true
 TARGET_BOOTLOADER_BOARD_NAME := MSM8960
 
@@ -21,45 +22,50 @@ TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_CPU_SMP := true
 ARCH_ARM_HAVE_TLS_REGISTER := true
 
-BOARD_KERNEL_CMDLINE :=  console=null androidboot.hardware=qcom user_debug=23 msm_rtb.filter=0x3F ehci-hcd.park=3 androidboot.selinux=permissive
+# Kernel
+TARGET_PREBUILT_KERNEL := $(DEVICE_TREE)/zImage
+
+# Boot image
+BOARD_KERNEL_CMDLINE :=  console=null androidboot.hardware=qcom androidboot.bootdevice=msm_sdcc.1 androidboot.selinux=permissive user_debug=23 msm_rtb.filter=0x3F ehci-hcd.park=3
 BOARD_KERNEL_BASE := 0x80200000
 BOARD_KERNEL_PAGESIZE := 2048
 BOARD_MKBOOTIMG_ARGS := --kernel_offset 0x00008000 --ramdisk_offset 0x02000000 --tags_offset 0x00000100
+BOARD_CUSTOM_BOOTIMG_MK :=  $(DEVICE_TREE)/bootimg.mk
 
+# Partitions
 BOARD_BOOTIMAGE_PARTITION_SIZE     := 0x000A00000
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x000A00000
 BOARD_SYSTEMIMAGE_PARTITION_SIZE   := 0x089600000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x2F93FC000 # 0x2F9400000 - 16384 (footer)
 BOARD_CACHEIMAGE_PARTITION_SIZE    := 0x015E00000
-BOARD_FLASH_BLOCK_SIZE := 131072
+BOARD_FLASH_BLOCK_SIZE := 0x20000
 
-TARGET_PREBUILT_KERNEL := device/samsung/jactivelte/zImage
-
-TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/msm_hsusb/gadget/lun%d/file"
-
-# Use this flag if the board has a ext4 partition larger than 2gb
+# File systems
 BOARD_HAS_LARGE_FILESYSTEM := true
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 BOARD_SUPPRESS_SECURE_ERASE := true
-BOARD_CUSTOM_BOOTIMG_MK :=  device/samsung/jactivelte/bootimg.mk
 
 # TWRP specific build flags
 TW_THEME := portrait_hdpi
 RECOVERY_SDCARD_ON_DATA := true
-BOARD_HAS_NO_REAL_SDCARD := true
-RECOVERY_GRAPHICS_USE_LINELENGTH := true
-TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
+TARGET_RECOVERY_QCOM_RTC_FIX := true
+TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/msm_hsusb/gadget/lun%d/file"
 TW_BRIGHTNESS_PATH := "/sys/devices/platform/msm_fb.526593/leds/lcd-backlight/brightness"
 TW_MAX_BRIGHTNESS := 255
 TW_DEFAULT_BRIGHTNESS := 162
-TW_INTERNAL_STORAGE_PATH := "/data/media/0"
-TW_INTERNAL_STORAGE_MOUNT_POINT := "data"
-TW_EXTERNAL_STORAGE_PATH := "/external_sd"
-TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
 TW_NO_REBOOT_BOOTLOADER := true
 TW_HAS_DOWNLOAD_MODE := true
-TW_INCLUDE_CRYPTO := true
+TW_INCLUDE_NTFS_3G := true
+
+# Disable exFAT fuse (exFAT kernel driver in use)
 TW_NO_EXFAT_FUSE := true
-TARGET_RECOVERY_QCOM_RTC_FIX := true
-TW_MTP_DEVICE := "/dev/mtp_usb"
+
+# Encryption support
+TW_INCLUDE_CRYPTO := true
+#TW_INCLUDE_CRYPTO_SAMSUNG := true
+TARGET_HW_DISK_ENCRYPTION := true
+TARGET_KEYMASTER_WAIT_FOR_QSEE := true
+
+# Debug flags
+#TWRP_INCLUDE_LOGCAT := true
